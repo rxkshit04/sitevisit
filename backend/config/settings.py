@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "apps.booking",
     "apps.messaging",
     "apps.reports",
+    "apps.chat",
 ]
 
 MIDDLEWARE = [
