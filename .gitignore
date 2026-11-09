@@ -4,3 +4,5 @@ __pycache__/
 .env
 staticfiles/
 node_modules/
+frontend/dist/
+.DS_Store
