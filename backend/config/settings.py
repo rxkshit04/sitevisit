@@ -7,12 +7,25 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv(BASE_DIR / ".env")
 
+# Render sets these on every service, so the deployed app works even if
+# the host variables were not entered by hand.
+ON_RENDER = os.environ.get("RENDER") == "true"
+RENDER_HOST = os.environ.get("RENDER_EXTERNAL_HOSTNAME", "")
+
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
-DEBUG = os.environ.get("DJANGO_DEBUG", "0") == "1"
+DEBUG = False if ON_RENDER else os.environ.get("DJANGO_DEBUG", "0") == "1"
+
 ALLOWED_HOSTS = [h for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",") if h]
 CSRF_TRUSTED_ORIGINS = [o for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if o]
+if RENDER_HOST:
+    if RENDER_HOST not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(RENDER_HOST)
+    if f"https://{RENDER_HOST}" not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(f"https://{RENDER_HOST}")
 
-PUBLIC_APP_URL = os.environ.get("PUBLIC_APP_URL", "http://localhost:5173")
+PUBLIC_APP_URL = os.environ.get("PUBLIC_APP_URL") or (
+    f"https://{RENDER_HOST}" if RENDER_HOST else "http://localhost:5173"
+)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
